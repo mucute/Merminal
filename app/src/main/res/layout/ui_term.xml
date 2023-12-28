@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+  <cn.mucute.merminal.view.TerminalView
+    android:id="@+id/terminal_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+      android:background="#FF212121"
+    android:fadeScrollbars="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:scrollbars="vertical"/>
+
+</RelativeLayout>
