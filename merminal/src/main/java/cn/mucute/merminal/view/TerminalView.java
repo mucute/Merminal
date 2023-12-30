@@ -23,6 +23,8 @@ import android.view.inputmethod.InputConnection;
 import android.widget.Scroller;
 
 
+import androidx.annotation.NonNull;
+
 import cn.mucute.merinal.R;
 import cn.mucute.merminal.core.EmulatorDebug;
 import cn.mucute.merminal.core.GestureAndScaleRecognizer;
@@ -378,7 +380,7 @@ public final class TerminalView extends View {
         return super.deleteSurroundingText(leftLength, rightLength);
       }
 
-      void sendTextToTerminal(CharSequence text) {
+      public void sendTextToTerminal(CharSequence text) {
         final int textLengthInChars = text.length();
         for (int i = 0; i < textLengthInChars; i++) {
           char firstChar = text.charAt(i);
@@ -779,7 +781,7 @@ public final class TerminalView extends View {
     return true;
   }
 
-  void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
+  public void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
     if (LOG_KEY_EVENTS) {
       Log.i(EmulatorDebug.LOG_TAG, "inputCodePoint(codePoint=" + codePoint + ", controlDownFromEvent=" + controlDownFromEvent + ", leftAltDownFromEvent="
         + leftAltDownFromEvent + ")");
@@ -918,24 +920,24 @@ public final class TerminalView extends View {
   }
 
   @Override
-  protected void onDraw(Canvas canvas) {
+  protected void onDraw(@NonNull Canvas canvas) {
     if (mEmulator == null) {
       canvas.drawColor(0XFF000000);
     } else {
       mRenderer.render(mEmulator, canvas, mTopRow, mSelY1, mSelY2, mSelX1, mSelX2);
 
       if (mIsSelectingText) {
-        final int gripHandleWidth = mLeftSelectionHandle.getIntrinsicWidth();
+        final int gripHandleWidth = mLeftSelectionHandle.getIntrinsicWidth()/3;
         final int gripHandleMargin = gripHandleWidth / 4; // See the png.
 
         int right = Math.round((mSelX1) * mRenderer.mFontWidth) + gripHandleMargin;
         int top = (mSelY1 + 1 - mTopRow) * mRenderer.mFontLineSpacing + mRenderer.mFontLineSpacingAndAscent;
-        mLeftSelectionHandle.setBounds(right - gripHandleWidth, top, right, top + mLeftSelectionHandle.getIntrinsicHeight());
+        mLeftSelectionHandle.setBounds(right - gripHandleWidth, top, right, top + mLeftSelectionHandle.getIntrinsicHeight()/3);
         mLeftSelectionHandle.draw(canvas);
 
         int left = Math.round((mSelX2 + 1) * mRenderer.mFontWidth) - gripHandleMargin;
         top = (mSelY2 + 1 - mTopRow) * mRenderer.mFontLineSpacing + mRenderer.mFontLineSpacingAndAscent;
-        mRightSelectionHandle.setBounds(left, top, left + gripHandleWidth, top + mRightSelectionHandle.getIntrinsicHeight());
+        mRightSelectionHandle.setBounds(left, top, left + gripHandleWidth, top + mRightSelectionHandle.getIntrinsicHeight()/3);
         mRightSelectionHandle.draw(canvas);
       }
     }
@@ -944,7 +946,6 @@ public final class TerminalView extends View {
   /**
    * Toggle text selection mode in the view.
    */
-  @TargetApi(23)
   public void toggleSelectingText(MotionEvent ev) {
     mIsSelectingText = !mIsSelectingText;
     mClient.copyModeChanged(mIsSelectingText);
@@ -967,10 +968,10 @@ public final class TerminalView extends View {
       TerminalBuffer screen = mEmulator.getScreen();
       if (!" ".equals(screen.getSelectedText(mSelX1, mSelY1, mSelX1, mSelY1))) {
         // Selecting something other than whitespace. Expand to word.
-        while (mSelX1 > 0 && !"".equals(screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1))) {
+        while (mSelX1 > 0 && !screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1).isEmpty()) {
           mSelX1--;
         }
-        while (mSelX2 < mEmulator.mColumns - 1 && !"".equals(screen.getSelectedText(mSelX2 + 1, mSelY1, mSelX2 + 1, mSelY1))) {
+        while (mSelX2 < mEmulator.mColumns - 1 && !screen.getSelectedText(mSelX2 + 1, mSelY1, mSelX2 + 1, mSelY1).isEmpty()) {
           mSelX2++;
         }
       }
@@ -986,9 +987,9 @@ public final class TerminalView extends View {
           int show = MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 
           ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-//          menu.add(Menu.NONE, 1, Menu.NONE, R.string.copy_text).setShowAsAction(show);
-//          menu.add(Menu.NONE, 2, Menu.NONE, R.string.paste_text).setEnabled(clipboard.hasPrimaryClip()).setShowAsAction(show);
-//          menu.add(Menu.NONE, 3, Menu.NONE, R.string.text_selection_more);
+          menu.add(Menu.NONE, 1, Menu.NONE, "复制").setShowAsAction(show);
+          menu.add(Menu.NONE, 2, Menu.NONE, "粘贴").setEnabled(clipboard.hasPrimaryClip()).setShowAsAction(show);
+//          menu.add(Menu.NONE, 3, Menu.NONE, "更多");
 
           return true;
         }

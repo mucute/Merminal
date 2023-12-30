@@ -7,18 +7,19 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import cn.mucute.merminal.composable.ShortcutKeyController
 import cn.mucute.merminal.core.KeyHandler
 import cn.mucute.merminal.core.TerminalSession
 
 
 class TermViewClient(
-  val context: Context,
+  private val context: Context,
   private val terminalView: TerminalView,
   private val termSession: ShellTermSession,
+  private val shortcutKeyController: ShortcutKeyController,
 ) : TerminalViewClient {
   private var mVirtualControlKeyDown: Boolean = false
   private var mVirtualFnKeyDown: Boolean = false
-  private var lastTitle: String = ""
 
   override fun onScale(scale: Float): Float {
     if (scale < 0.9f || scale > 1.1f) {
@@ -63,10 +64,10 @@ class TermViewClient(
     // TODO 自定义快捷键
     if (e != null && e.isCtrlPressed && e.isShiftPressed) {
       // Get the unmodified code point:
-      val unicodeChar = e.getUnicodeChar(0).toChar()
+      e.getUnicodeChar(0).toChar()
 
 
-      // 当要触发 NeoTerm 快捷键时，屏蔽所有终端处理key
+      // 当要触发 Merminal 快捷键时，屏蔽所有终端处理key
       return true
     } else if (e != null && e.isAltPressed) {
       // Get the unmodified code point:
@@ -76,7 +77,7 @@ class TermViewClient(
       }
 
       // Use Alt + num to switch sessions
-      val sessionIndex = unicodeChar.toInt() - '0'.toInt()
+      unicodeChar.toInt() - '0'.toInt()
 
 
       // 当要触发 NeoTerm 快捷键时，屏蔽所有终端处理key
@@ -90,13 +91,12 @@ class TermViewClient(
   }
 
   override fun readControlKey(): Boolean {
-
-    return false
+    return shortcutKeyController.pressedCtrlKey
   }
 
   override fun readAltKey(): Boolean {
 //    val extraKeysView = termSessionData?.extraKeysView
-    return false
+    return shortcutKeyController.pressedAltKey
   }
 
   override fun onCodePoint(codePoint: Int, ctrlDown: Boolean, session: TerminalSession?): Boolean {

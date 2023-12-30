@@ -71,17 +71,17 @@ public final class TerminalColorScheme {
     System.arraycopy(DEFAULT_COLORS, 0, mDefaultColors, 0, TextStyle.NUM_INDEXED_COLORS);
   }
 
-  public void updateWith(String foreground, String background, String cursor, Map<Integer, String> color) {
+  public void updateWith(int foreground, int background, int cursor, Map<Integer, String> color) {
     Properties prop = new Properties();
-    if (foreground != null) {
+
       prop.put("foreground", foreground);
-    }
-    if (background != null) {
+
+
       prop.put("background", background);
-    }
-    if (cursor != null) {
+
+
       prop.put("cursor", cursor);
-    }
+
     for (int i : color.keySet()) {
       prop.put("color" + i, color.get(i));
     }
@@ -92,7 +92,7 @@ public final class TerminalColorScheme {
     reset();
     for (Map.Entry<Object, Object> entries : props.entrySet()) {
       String key = (String) entries.getKey();
-      String value = (String) entries.getValue();
+      Integer value = (Integer) entries.getValue();
       int colorIndex;
 
       if (key.equals("foreground")) {
@@ -111,7 +111,7 @@ public final class TerminalColorScheme {
         throw new IllegalArgumentException("Invalid property: '" + key + "'");
       }
 
-      int colorValue = TerminalColors.parse(value);
+      int colorValue =(value);
       if (colorValue == 0)
         throw new IllegalArgumentException("Property '" + key + "' has invalid color: '" + value + "'");
 

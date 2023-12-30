@@ -73,6 +73,8 @@ public class TerminalSession extends TerminalOutput {
 
   private TerminalEmulator mEmulator;
 
+  public TerminalColorScheme colorScheme;
+
   /**
    * A queue written to from a separate thread when the process outputs, and read by main thread to process by
    * terminal emulator.
@@ -184,7 +186,9 @@ public class TerminalSession extends TerminalOutput {
    */
   public void initializeEmulator(int columns, int rows) {
     mEmulator = new TerminalEmulator(this, columns, rows, /* transcript= */2000);
-
+    if (colorScheme!=null){
+      mEmulator.setColorScheme(colorScheme);
+    }
     int[] processId = new int[1];
     mTerminalFileDescriptor = JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns);
     mShellPid = processId[0];
@@ -307,8 +311,7 @@ public class TerminalSession extends TerminalOutput {
       try {
         Os.kill(mShellPid, OsConstants.SIGKILL);
       } catch (ErrnoException e) {
-        Log.w("neoterm-shell-session",
-          "Failed sending SIGKILL: " + e.getMessage());
+
       }
     }
   }
